@@ -180,7 +180,7 @@ export default function Canvas({ blocks, onAsk, onDelete, onPin, onExportPdf, on
                   )}
 
                   <div className={isFresh ? 'block-glow rounded-xl' : ''}>
-                    {render(b, onAsk, () => onDelete(b.id), () => onPin(b.id))}
+                    {render(b, onAsk, () => onDelete(b.id), () => onPin(b.id), !!isFresh)}
                   </div>
                 </div>
               );
@@ -242,14 +242,14 @@ function EmptyState() {
   );
 }
 
-function render(b: Block, onAsk: (q: string) => void, onDelete: () => void, onPin: () => void) {
+function render(b: Block, onAsk: (q: string) => void, onDelete: () => void, onPin: () => void, animate: boolean) {
   const common = { onAsk, onDelete, pinned: b.pinned, kind: b.kind, onPin };
   switch (b.kind) {
-    case 'chart': return <ChartBlock payload={b.payload} {...common} />;
+    case 'chart': return <ChartBlock payload={b.payload} animate={animate} {...common} />;
     case 'mermaid': return <MermaidBlock payload={b.payload} {...common} />;
     case 'table': return <TableBlock payload={b.payload} {...common} />;
     case 'metric': return <MetricBlock payload={b.payload} {...common} />;
-    case 'forecast': return <ForecastBlock payload={b.payload} {...common} />;
+    case 'forecast': return <ForecastBlock payload={b.payload} animate={animate} {...common} />;
     case 'model_training': return <ModelTrainingBlock payload={b.payload} {...common} />;
     case 'markdown': return <MarkdownBlock payload={b.payload} {...common} />;
     case 'image_analysis': return <ImageAnalysisBlock payload={b.payload} {...common} />;

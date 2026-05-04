@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { memo, useEffect, useState } from 'react';
 import { Brain, Check, Loader2, MessageCircle, Trash2, Award, AlertTriangle } from 'lucide-react';
 import { KindChip, PinChip, ActionBtn } from './BlockHeader';
 
@@ -23,7 +23,7 @@ function gradeFor(metrics: Record<string, any>) {
   return { grade: '?', label: 'N/A', tone: 'C' };
 }
 
-export default function ModelTrainingBlock({ payload, onAsk, onDelete, kind, pinned }: { payload: any; onAsk?: (q: string) => void; onDelete?: () => void; kind?: string; pinned?: boolean }) {
+function ModelTrainingBlock({ payload, onAsk, onDelete, kind, pinned }: { payload: any; onAsk?: (q: string) => void; onDelete?: () => void; kind?: string; pinned?: boolean }) {
   const [progress, setProgress] = useState(payload.steps || []);
   useEffect(() => { setProgress(payload.steps || []); }, [payload]);
 
@@ -186,3 +186,9 @@ export default function ModelTrainingBlock({ payload, onAsk, onDelete, kind, pin
     </div>
   );
 }
+
+export default memo(ModelTrainingBlock, (prev, next) =>
+  prev.payload === next.payload &&
+  prev.pinned === next.pinned &&
+  prev.kind === next.kind,
+);

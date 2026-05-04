@@ -1,8 +1,9 @@
 'use client';
+import { memo } from 'react';
 import { MessageCircle, Trash2 } from 'lucide-react';
 import { KindChip, PinChip, ActionBtn } from './BlockHeader';
 
-export default function MetricBlock({ payload, onAsk, onDelete, kind, pinned }: { payload: any; onAsk?: (q: string) => void; onDelete?: () => void; kind?: string; pinned?: boolean }) {
+function MetricBlock({ payload, onAsk, onDelete, kind, pinned }: { payload: any; onAsk?: (q: string) => void; onDelete?: () => void; kind?: string; pinned?: boolean }) {
   const tone = payload.tone || 'neutral';
   return (
     <div className="canvas-block card relative">
@@ -23,3 +24,9 @@ export default function MetricBlock({ payload, onAsk, onDelete, kind, pinned }: 
     </div>
   );
 }
+
+export default memo(MetricBlock, (prev, next) =>
+  prev.payload === next.payload &&
+  prev.pinned === next.pinned &&
+  prev.kind === next.kind,
+);

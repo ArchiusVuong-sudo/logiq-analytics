@@ -1,9 +1,9 @@
 'use client';
-import { useState } from 'react';
+import { memo, useState } from 'react';
 import { Image as ImageIcon, Trash2, MessageCircle, Upload } from 'lucide-react';
 import { KindChip, PinChip, ActionBtn } from './BlockHeader';
 
-export default function ImageAnalysisBlock({ payload, onAsk, onDelete, onImport, kind, pinned }: { payload: any; onAsk?: (q: string) => void; onDelete?: () => void; onImport?: (rows: any[]) => void; kind?: string; pinned?: boolean }) {
+function ImageAnalysisBlock({ payload, onAsk, onDelete, onImport, kind, pinned }: { payload: any; onAsk?: (q: string) => void; onDelete?: () => void; onImport?: (rows: any[]) => void; kind?: string; pinned?: boolean }) {
   const [importing, setImporting] = useState(false);
   const [done, setDone] = useState<null | string>(null);
   const rows = payload.suggestedImport?.rows || payload.structured?.rows || [];
@@ -81,3 +81,9 @@ export default function ImageAnalysisBlock({ payload, onAsk, onDelete, onImport,
     </div>
   );
 }
+
+export default memo(ImageAnalysisBlock, (prev, next) =>
+  prev.payload === next.payload &&
+  prev.pinned === next.pinned &&
+  prev.kind === next.kind,
+);

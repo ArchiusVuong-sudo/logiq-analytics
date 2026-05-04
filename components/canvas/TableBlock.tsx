@@ -1,8 +1,9 @@
 'use client';
+import { memo } from 'react';
 import { MessageCircle, Trash2, Download } from 'lucide-react';
 import { KindChip, PinChip, ActionBtn } from './BlockHeader';
 
-export default function TableBlock({ payload, onAsk, onDelete, kind, pinned }: { payload: any; onAsk?: (q: string) => void; onDelete?: () => void; kind?: string; pinned?: boolean }) {
+function TableBlock({ payload, onAsk, onDelete, kind, pinned }: { payload: any; onAsk?: (q: string) => void; onDelete?: () => void; kind?: string; pinned?: boolean }) {
   const downloadCsv = () => {
     const cols = payload.columns || [];
     const rows = payload.rows || [];
@@ -49,3 +50,9 @@ export default function TableBlock({ payload, onAsk, onDelete, kind, pinned }: {
     </div>
   );
 }
+
+export default memo(TableBlock, (prev, next) =>
+  prev.payload === next.payload &&
+  prev.pinned === next.pinned &&
+  prev.kind === next.kind,
+);

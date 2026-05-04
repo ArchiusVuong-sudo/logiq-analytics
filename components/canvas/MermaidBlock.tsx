@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useRef } from 'react';
+import { memo, useEffect, useRef } from 'react';
 import { MessageCircle, Trash2 } from 'lucide-react';
 import { useTheme } from '@/components/ThemeToggle';
 import { KindChip, PinChip, ActionBtn } from './BlockHeader';
@@ -13,7 +13,7 @@ async function getMermaid() {
   return mermaidLib;
 }
 
-export default function MermaidBlock({ payload, onAsk, onDelete, kind, pinned }: { payload: any; onAsk?: (q: string) => void; onDelete?: () => void; kind?: string; pinned?: boolean }) {
+function MermaidBlock({ payload, onAsk, onDelete, kind, pinned }: { payload: any; onAsk?: (q: string) => void; onDelete?: () => void; kind?: string; pinned?: boolean }) {
   const ref = useRef<HTMLDivElement>(null);
   const [theme] = useTheme();
 
@@ -68,3 +68,9 @@ export default function MermaidBlock({ payload, onAsk, onDelete, kind, pinned }:
     </div>
   );
 }
+
+export default memo(MermaidBlock, (prev, next) =>
+  prev.payload === next.payload &&
+  prev.pinned === next.pinned &&
+  prev.kind === next.kind,
+);

@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useRef, useState } from 'react';
+import { memo, useEffect, useRef, useState } from 'react';
 import {
   Chart, CategoryScale, LinearScale, BarElement, LineElement, PointElement,
   ArcElement, RadialLinearScale, ScatterController, BarController, LineController,
@@ -19,13 +19,14 @@ Chart.register(
 
 const PALETTE = ['#7c5cff', '#46d9ff', '#34d399', '#fbbf24', '#f87171', '#f472b6', '#a78bfa', '#60a5fa', '#22d3ee', '#84cc16'];
 
-export default function ChartBlock({ payload, onAsk, onDelete, onPin, pinned, kind }: {
+function ChartBlock({ payload, onAsk, onDelete, onPin, pinned, kind, animate = true }: {
   payload: any;
   onAsk?: (q: string) => void;
   onDelete?: () => void;
   onPin?: () => void;
   pinned?: boolean;
   kind?: string;
+  animate?: boolean;
 }) {
   const ref = useRef<HTMLCanvasElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -94,7 +95,7 @@ export default function ChartBlock({ payload, onAsk, onDelete, onPin, pinned, ki
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        animation: chartAnimationFor(baseType, pointCount),
+        animation: animate ? chartAnimationFor(baseType, pointCount) : false,
         ...(hoverPolish as any),
         plugins: {
           legend: {
@@ -129,7 +130,7 @@ export default function ChartBlock({ payload, onAsk, onDelete, onPin, pinned, ki
     }
 
     return () => { chartRef.current?.destroy(); chartRef.current = null; };
-  }, [payload, theme]);
+  }, [payload, theme, animate]);
 
   const downloadPng = () => {
     if (!ref.current) return;
@@ -208,3 +209,10 @@ export default function ChartBlock({ payload, onAsk, onDelete, onPin, pinned, ki
     </div>
   );
 }
+
+export default memo(ChartBlock, (prev, next) =>
+  prev.payload === next.payload &&
+  prev.pinned === next.pinned &&
+  prev.animate === next.animate &&
+  prev.kind === next.kind,
+);

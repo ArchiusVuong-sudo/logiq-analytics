@@ -1,9 +1,9 @@
 'use client';
-import { useState } from 'react';
+import { memo, useState } from 'react';
 import { Download, MessageCircle, Trash2, ImagePlus, Wand2, Copy, Check } from 'lucide-react';
 import { KindChip, PinChip, ActionBtn } from './BlockHeader';
 
-export default function GeneratedImageBlock({ payload, onAsk, onDelete, kind, pinned }: {
+function GeneratedImageBlock({ payload, onAsk, onDelete, kind, pinned }: {
   payload: any;
   onAsk?: (q: string) => void;
   onDelete?: () => void;
@@ -79,3 +79,9 @@ export default function GeneratedImageBlock({ payload, onAsk, onDelete, kind, pi
     </div>
   );
 }
+
+export default memo(GeneratedImageBlock, (prev, next) =>
+  prev.payload === next.payload &&
+  prev.pinned === next.pinned &&
+  prev.kind === next.kind,
+);

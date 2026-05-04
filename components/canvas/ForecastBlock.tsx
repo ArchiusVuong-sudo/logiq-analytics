@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useMemo, useRef } from 'react';
+import { memo, useEffect, useMemo, useRef } from 'react';
 import { Chart, CategoryScale, LinearScale, LineElement, PointElement, LineController, Tooltip, Legend, Filler, Title } from 'chart.js';
 import { MessageCircle, Trash2, TrendingUp, TrendingDown, Minus, ShieldCheck, Shield, ShieldAlert } from 'lucide-react';
 import { useTheme } from '@/components/ThemeToggle';
@@ -8,7 +8,7 @@ import { progressiveLineAnimation, hoverPolish, makeAreaGradient } from '@/lib/u
 
 Chart.register(CategoryScale, LinearScale, LineElement, PointElement, LineController, Tooltip, Legend, Filler, Title);
 
-export default function ForecastBlock({ payload, onAsk, onDelete, kind, pinned }: { payload: any; onAsk?: (q: string) => void; onDelete?: () => void; kind?: string; pinned?: boolean }) {
+function ForecastBlock({ payload, onAsk, onDelete, kind, pinned, animate = true }: { payload: any; onAsk?: (q: string) => void; onDelete?: () => void; kind?: string; pinned?: boolean; animate?: boolean }) {
   const ref = useRef<HTMLCanvasElement>(null);
   const [theme] = useTheme();
   const tickColor = theme === 'light' ? '#5b6373' : '#6b7185';
@@ -67,7 +67,7 @@ export default function ForecastBlock({ payload, onAsk, onDelete, kind, pinned }
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        animation: { duration: 1200, easing: 'easeOutCubic', ...(progressiveLineAnimation(labels.length, Math.min(1500, labels.length * 90)) as any) },
+        animation: animate ? { duration: 1200, easing: 'easeOutCubic', ...(progressiveLineAnimation(labels.length, Math.min(1500, labels.length * 90)) as any) } : false,
         ...(hoverPolish as any),
         plugins: {
           legend: { labels: { color: legendColor, font: { size: 11 }, filter: (l: any) => !l.text.startsWith('Confidence'), usePointStyle: true, pointStyle: 'circle', boxWidth: 8 } },
@@ -94,7 +94,7 @@ export default function ForecastBlock({ payload, onAsk, onDelete, kind, pinned }
     }, 0);
 
     return () => c.destroy();
-  }, [payload, theme]);
+  }, [payload, theme, animate]);
 
   const trend = useMemo(() => {
     const fc = payload.forecast || [];
@@ -172,3 +172,10 @@ export default function ForecastBlock({ payload, onAsk, onDelete, kind, pinned }
     </div>
   );
 }
+
+export default memo(ForecastBlock, (prev, next) =>
+  prev.payload === next.payload &&
+  prev.pinned === next.pinned &&
+  prev.animate === next.animate &&
+  prev.kind === next.kind,
+);

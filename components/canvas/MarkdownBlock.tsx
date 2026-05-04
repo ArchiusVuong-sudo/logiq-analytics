@@ -1,4 +1,5 @@
 'use client';
+import { memo } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
@@ -23,7 +24,7 @@ const sanitizeSchema = {
   ],
 };
 
-export default function MarkdownBlock({ payload, onAsk, onDelete, kind, pinned }: { payload: any; onAsk?: (q: string) => void; onDelete?: () => void; kind?: string; pinned?: boolean }) {
+function MarkdownBlock({ payload, onAsk, onDelete, kind, pinned }: { payload: any; onAsk?: (q: string) => void; onDelete?: () => void; kind?: string; pinned?: boolean }) {
   return (
     <div className="canvas-block card relative">
       <div className="block-header">
@@ -48,3 +49,9 @@ export default function MarkdownBlock({ payload, onAsk, onDelete, kind, pinned }
     </div>
   );
 }
+
+export default memo(MarkdownBlock, (prev, next) =>
+  prev.payload === next.payload &&
+  prev.pinned === next.pinned &&
+  prev.kind === next.kind,
+);
