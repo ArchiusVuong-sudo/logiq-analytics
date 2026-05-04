@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { X, Key, Eye, EyeOff, Sparkles, Wand2, Eye as EyeIcon, Check, ChevronDown } from 'lucide-react';
+import { X, Key, Eye, EyeOff, Sparkles, Wand2, Eye as EyeIcon, ChevronDown } from 'lucide-react';
 
 const LS_ANTHROPIC = 'logiq_anthropic_key';
 const LS_GEMINI = 'logiq_gemini_key';
@@ -110,9 +110,6 @@ function ThemedSelect({ value, options, onChange, mono = true, ariaLabel }: { va
                 onClick={() => { onChange(o.value); setOpen(false); }}
                 className={`themed-select-option ${selected ? 'is-selected' : ''} ${active ? 'is-active' : ''}`}
               >
-                <span className={`themed-select-check ${selected ? 'visible' : ''}`}>
-                  <Check size={11} />
-                </span>
                 <div className="themed-select-option-body">
                   <div className={`themed-select-option-label ${mono ? 'font-mono' : ''}`}>{o.label}</div>
                   {o.hint && <div className="themed-select-option-hint">{o.hint}</div>}

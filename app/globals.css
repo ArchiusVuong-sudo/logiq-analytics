@@ -1172,19 +1172,6 @@ input:focus, textarea:focus, select:focus { border-color: var(--color-accent); b
   background: linear-gradient(90deg, rgba(124,92,255,0.20), rgba(70,217,255,0.10));
 }
 
-.themed-select-check {
-  width: 14px; height: 14px;
-  display: inline-flex; align-items: center; justify-content: center;
-  border-radius: 4px;
-  background: var(--color-panel-2);
-  border: 1px solid var(--color-border);
-  color: var(--color-accent);
-  flex-shrink: 0;
-  opacity: 0;
-  transition: opacity 0.1s ease;
-}
-.themed-select-check.visible { opacity: 1; background: rgba(124,92,255,0.18); border-color: rgba(124,92,255,0.45); }
-
 .themed-select-option-body { flex: 1; min-width: 0; }
 .themed-select-option-label { font-size: 12px; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .themed-select-option-hint { font-size: 10.5px; color: var(--color-text-faint); margin-top: 2px; }
