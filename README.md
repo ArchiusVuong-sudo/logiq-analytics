@@ -11,7 +11,8 @@ The AI layer **never fabricates numbers**. Every figure on screen comes from a r
 
 ## Live demo & reviewer access
 
-**🌐 Deployed app:** _populated after `vercel --prod` — see deployment section below._
+**🌐 Deployed app:** **https://logiq-analytics.vercel.app**
+**📦 Source:** https://github.com/ArchiusVuong-sudo/logiq-analytics
 
 **How to test it:**
 1. Open the deployed URL — the **Dashboard** loads immediately against the pre-seeded Supabase dataset (no setup required).

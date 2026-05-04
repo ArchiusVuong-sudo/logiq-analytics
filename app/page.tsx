@@ -415,7 +415,7 @@ export default function Landing() {
           <div className="flex items-center gap-4">
             <Link href="/setup" className="hover:text-[var(--color-text)]">Setup</Link>
             <Link href="/workspace" className="hover:text-[var(--color-text)]">Workspace</Link>
-            <a href="https://github.com/anthropics/claude-code" target="_blank" rel="noopener noreferrer" className="hover:text-[var(--color-text)] inline-flex items-center gap-1">
+            <a href="https://github.com/ArchiusVuong-sudo/logiq-analytics" target="_blank" rel="noopener noreferrer" className="hover:text-[var(--color-text)] inline-flex items-center gap-1">
               <Github size={11} /> Source
             </a>
           </div>
