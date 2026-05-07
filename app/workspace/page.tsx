@@ -26,6 +26,7 @@ function Workspace() {
   const [messages, setMessages] = useState<ChatMsg[]>([]);
   const [blocks, setBlocks] = useState<Block[]>([]);
   const [busy, setBusy] = useState(false);
+  const [loadingThread, setLoadingThread] = useState(false);
   const [openSettings, setOpenSettings] = useState(false);
   const [openImport, setOpenImport] = useState(false);
   const [prefill, setPrefill] = useState<string | undefined>();
@@ -75,14 +76,21 @@ function Workspace() {
 
   const selectThread = async (id: string) => {
     setCurrentThread(id);
-    const r = await fetch(`/api/threads/${id}`).then(r => r.json());
-    const msgs: ChatMsg[] = [];
-    for (const m of r.messages || []) {
-      if (m.role === 'user') msgs.push({ id: m.id, role: 'user', text: m.content?.parts?.find((p: any) => p.type === 'text')?.text || '' });
-      else msgs.push({ id: m.id, role: 'assistant', text: m.content?.text || '', steps: [] });
+    setLoadingThread(true);
+    setMessages([]);
+    setBlocks([]);
+    try {
+      const r = await fetch(`/api/threads/${id}`).then(r => r.json());
+      const msgs: ChatMsg[] = [];
+      for (const m of r.messages || []) {
+        if (m.role === 'user') msgs.push({ id: m.id, role: 'user', text: m.content?.parts?.find((p: any) => p.type === 'text')?.text || '' });
+        else msgs.push({ id: m.id, role: 'assistant', text: m.content?.text || '', steps: [] });
+      }
+      setMessages(msgs);
+      setBlocks((r.blocks || []).map((b: any) => ({ id: b.id, kind: b.kind, payload: b.payload, pinned: b.pinned })));
+    } finally {
+      setLoadingThread(false);
     }
-    setMessages(msgs);
-    setBlocks((r.blocks || []).map((b: any) => ({ id: b.id, kind: b.kind, payload: b.payload, pinned: b.pinned })));
   };
 
   const deleteThread = async (id: string) => {
@@ -335,6 +343,7 @@ function Workspace() {
                 onPin={onPinBlock}
                 onExportPdf={exportCanvasPdf}
                 onReorder={onReorder}
+                loading={loadingThread}
               />
             </div>
             <div className="min-h-0">
@@ -345,6 +354,7 @@ function Workspace() {
                 onSend={onSend}
                 onCancel={onCancel}
                 onPrefillConsumed={() => setPrefill(undefined)}
+                loading={loadingThread}
               />
             </div>
           </div>

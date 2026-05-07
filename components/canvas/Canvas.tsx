@@ -10,7 +10,7 @@ import MarkdownBlock from './MarkdownBlock';
 import ImageAnalysisBlock from './ImageAnalysisBlock';
 import GeneratedImageBlock from './GeneratedImageBlock';
 import {
-  Hash, Layers, Pin, Filter, ArrowUpDown, GitBranch, GripVertical, FileText,
+  Hash, Layers, Pin, Filter, ArrowUpDown, GitBranch, GripVertical, FileText, Loader2,
 } from 'lucide-react';
 import { KIND_META } from './BlockHeader';
 
@@ -18,13 +18,14 @@ export type Block = { id: string; kind: string; payload: any; pinned?: boolean; 
 
 type SortMode = 'natural' | 'pinned-first' | 'newest' | 'oldest' | 'kind';
 
-export default function Canvas({ blocks, onAsk, onDelete, onPin, onExportPdf, onReorder }: {
+export default function Canvas({ blocks, onAsk, onDelete, onPin, onExportPdf, onReorder, loading = false }: {
   blocks: Block[];
   onAsk: (q: string) => void;
   onDelete: (id: string) => void;
   onPin: (id: string) => void;
   onExportPdf: () => void;
   onReorder?: (orderedIds: string[]) => void;
+  loading?: boolean;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const [autoScroll, setAutoScroll] = useState(true);
@@ -141,7 +142,13 @@ export default function Canvas({ blocks, onAsk, onDelete, onPin, onExportPdf, on
       )}
 
       <div ref={ref} className="flex-1 overflow-auto p-4">
-        {blocks.length === 0 ? (
+        {loading && blocks.length === 0 ? (
+          <div className="h-full flex flex-col items-center justify-center text-center text-[var(--color-text-faint)]">
+            <Loader2 className="animate-spin text-[var(--color-accent)] mb-3" size={22} />
+            <div className="text-sm font-semibold gradient-text">Loading canvas…</div>
+            <div className="text-xs mt-1">Restoring blocks from this conversation.</div>
+          </div>
+        ) : blocks.length === 0 ? (
           <EmptyState />
         ) : visible.length === 0 ? (
           <div className="h-full flex flex-col items-center justify-center text-center text-[var(--color-text-faint)] text-sm">

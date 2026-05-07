@@ -2,24 +2,32 @@
 import { useEffect, useRef, useState } from 'react';
 import MessageBubble, { Step } from './MessageBubble';
 import ChatInput from './ChatInput';
-import { Brain } from 'lucide-react';
+import { Brain, Loader2 } from 'lucide-react';
 
 export type ChatMsg = { id: string; role: 'user' | 'assistant'; text: string; steps?: Step[]; streaming?: boolean; startedAt?: number; endedAt?: number };
 
-export default function ChatPanel({ messages, busy, prefill, onSend, onCancel, onPrefillConsumed }: {
+export default function ChatPanel({ messages, busy, prefill, onSend, onCancel, onPrefillConsumed, loading = false }: {
   messages: ChatMsg[];
   busy: boolean;
   prefill?: string;
   onSend: (t: string, images: { id: string; mime: string; base64: string }[]) => void;
   onCancel: () => void;
   onPrefillConsumed: () => void;
+  loading?: boolean;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => { if (ref.current) ref.current.scrollTop = ref.current.scrollHeight; }, [messages]);
   return (
     <div className="flex flex-col h-full">
       <div className="flex-1 overflow-auto px-4 py-3 space-y-4" ref={ref}>
-        {messages.length === 0 && (
+        {loading && messages.length === 0 && (
+          <div className="h-full flex flex-col items-center justify-center text-center">
+            <Loader2 className="animate-spin text-[var(--color-accent)] mb-3" size={20} />
+            <div className="text-sm font-semibold gradient-text">Loading conversation…</div>
+            <div className="text-xs text-[var(--color-text-faint)] mt-1">Fetching messages and canvas blocks.</div>
+          </div>
+        )}
+        {!loading && messages.length === 0 && (
           <div className="h-full flex flex-col items-center justify-center text-center">
             <div className="w-12 h-12 rounded-2xl glass flex items-center justify-center mb-3">
               <Brain className="text-[var(--color-accent)]" />
