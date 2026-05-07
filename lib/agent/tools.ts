@@ -343,9 +343,40 @@ export function canvasKindFromTool(name: string): string {
   return name.replace(/^create_/, '').replace(/_block$/, '');
 }
 
+// Claude occasionally serializes complex tool args as a JSON string instead
+// of the actual array/object (e.g. datasets="[…]" rather than datasets=[…]).
+// Normalize known array-shaped fields before persisting so renderers don't
+// have to defend against it.
+function coerceJsonField(payload: any, key: string) {
+  const v = payload?.[key];
+  if (typeof v !== 'string') return;
+  try {
+    const parsed = JSON.parse(v);
+    if (Array.isArray(parsed) || (parsed && typeof parsed === 'object')) {
+      payload[key] = parsed;
+    }
+  } catch { /* leave the original string; renderer has its own fallback */ }
+}
+
+function normalizeCanvasPayload(kind: string, payload: any): any {
+  if (!payload || typeof payload !== 'object') return payload;
+  if (kind === 'chart') {
+    coerceJsonField(payload, 'datasets');
+    coerceJsonField(payload, 'labels');
+  } else if (kind === 'forecast') {
+    coerceJsonField(payload, 'history');
+    coerceJsonField(payload, 'forecast');
+  } else if (kind === 'table') {
+    coerceJsonField(payload, 'rows');
+    coerceJsonField(payload, 'columns');
+  }
+  return payload;
+}
+
 export async function persistCanvasBlock(threadId: string | null, kind: string, payload: any): Promise<string> {
   const db = adminDb();
-  const ins = await db.from('canvas_blocks').insert({ thread_id: threadId, kind, payload }).select('id').single();
+  const normalized = normalizeCanvasPayload(kind, payload);
+  const ins = await db.from('canvas_blocks').insert({ thread_id: threadId, kind, payload: normalized }).select('id').single();
   if (ins.error) throw ins.error;
   return ins.data.id;
 }

@@ -8,6 +8,16 @@ import { progressiveLineAnimation, hoverPolish, makeAreaGradient } from '@/lib/u
 
 Chart.register(CategoryScale, LinearScale, LineElement, PointElement, LineController, Tooltip, Legend, Filler, Title);
 
+// Defensive: same trick chart blocks need — agents occasionally serialize
+// history/forecast as a string instead of an array.
+function coerceArray(v: any): any[] {
+  if (Array.isArray(v)) return v;
+  if (typeof v === 'string') {
+    try { const p = JSON.parse(v); return Array.isArray(p) ? p : []; } catch { return []; }
+  }
+  return [];
+}
+
 function ForecastBlock({ payload, onAsk, onDelete, kind, pinned, animate = true }: { payload: any; onAsk?: (q: string) => void; onDelete?: () => void; kind?: string; pinned?: boolean; animate?: boolean }) {
   const ref = useRef<HTMLCanvasElement>(null);
   const [theme] = useTheme();
@@ -20,8 +30,8 @@ function ForecastBlock({ payload, onAsk, onDelete, kind, pinned, animate = true 
   const tooltipDim = theme === 'light' ? '#5e6678' : '#9aa3b6';
   useEffect(() => {
     if (!ref.current) return;
-    const history = payload.history || [];
-    const forecast = payload.forecast || [];
+    const history = coerceArray(payload.history);
+    const forecast = coerceArray(payload.forecast);
     const labels = [...history.map((h: any) => h.date), ...forecast.map((f: any) => f.date)];
     const histVals = [...history.map((h: any) => h.value), ...forecast.map(() => null)];
     const fcVals = [...history.map(() => null), ...forecast.map((f: any) => f.value)];
@@ -97,8 +107,8 @@ function ForecastBlock({ payload, onAsk, onDelete, kind, pinned, animate = true 
   }, [payload, theme, animate]);
 
   const trend = useMemo(() => {
-    const fc = payload.forecast || [];
-    const hist = payload.history || [];
+    const fc = coerceArray(payload.forecast);
+    const hist = coerceArray(payload.history);
     if (fc.length < 2 || hist.length === 0) return { kind: 'flat', delta: 0, pct: 0 };
     const histTail = hist.slice(-3).reduce((s: number, h: any) => s + Number(h.value || 0), 0) / Math.min(3, hist.length);
     const fcAvg = fc.reduce((s: number, f: any) => s + Number(f.value || 0), 0) / fc.length;

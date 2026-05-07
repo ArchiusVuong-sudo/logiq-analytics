@@ -19,6 +19,19 @@ Chart.register(
 
 const PALETTE = ['#7c5cff', '#46d9ff', '#34d399', '#fbbf24', '#f87171', '#f472b6', '#a78bfa', '#60a5fa', '#22d3ee', '#84cc16'];
 
+// Defensive: tool calls sometimes arrive with `datasets` or `labels` as a
+// stringified JSON instead of an array. Coerce so the renderer never crashes.
+function coerceArray(v: any): any[] {
+  if (Array.isArray(v)) return v;
+  if (typeof v === 'string') {
+    try {
+      const parsed = JSON.parse(v);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch { return []; }
+  }
+  return [];
+}
+
 function ChartBlock({ payload, onAsk, onDelete, onPin, pinned, kind, animate = true }: {
   payload: any;
   onAsk?: (q: string) => void;
@@ -46,7 +59,7 @@ function ChartBlock({ payload, onAsk, onDelete, onPin, pinned, kind, animate = t
     const isPie = payload.type === 'pie' || payload.type === 'doughnut';
     const isLine = payload.type === 'line';
     const isBar = payload.type === 'bar';
-    const datasets = (payload.datasets || []).map((d: any, i: number) => {
+    const datasets = coerceArray(payload.datasets).map((d: any, i: number) => {
       const color = PALETTE[i % PALETTE.length];
       const fill = d.fill ?? isLine;
       const base: any = {
@@ -68,7 +81,7 @@ function ChartBlock({ payload, onAsk, onDelete, onPin, pinned, kind, animate = t
       };
       // Gradient backgrounds: bars get vertical fade; line area gets purple-to-transparent
       if (isPie) {
-        base.backgroundColor = d.backgroundColor || PALETTE.slice(0, (payload.labels || []).length);
+        base.backgroundColor = d.backgroundColor || PALETTE.slice(0, coerceArray(payload.labels).length);
         base.borderWidth = 2;
         base.borderColor = theme === 'light' ? '#ffffff' : '#11141d';
         base.hoverOffset = 8;
@@ -88,10 +101,10 @@ function ChartBlock({ payload, onAsk, onDelete, onPin, pinned, kind, animate = t
     });
 
     const baseType = payload.type === 'mixed' ? 'bar' : payload.type;
-    const pointCount = (payload.labels || []).length;
+    const pointCount = coerceArray(payload.labels).length;
     const cfg: ChartConfiguration = {
       type: baseType,
-      data: { labels: payload.labels || [], datasets },
+      data: { labels: coerceArray(payload.labels), datasets },
       options: {
         responsive: true,
         maintainAspectRatio: false,
