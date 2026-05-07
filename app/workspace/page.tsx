@@ -118,6 +118,16 @@ function Workspace() {
 
   const onSend = useCallback(async (text: string, images: { id: string; mime: string; base64: string }[]) => {
     if (!text.trim() && images.length === 0) return;
+
+    // Validate the API key BEFORE creating any DB rows. Otherwise a missing
+    // key creates an orphan thread (title set, no messages persisted).
+    const keys = loadKeys();
+    if (!keys.anthropic) {
+      setMessages(prev => [...prev, { id: `e_${Date.now()}`, role: 'assistant', text: '⚠ No Anthropic API key set. Open Settings to add one.' }]);
+      setOpenSettings(true);
+      return;
+    }
+
     let tid = currentThread;
     if (!tid) {
       const r = await fetch('/api/threads', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ title: text.slice(0, 60) || 'New conversation' }) }).then(r => r.json());
@@ -133,14 +143,6 @@ function Workspace() {
     const userMsg: ChatMsg = { id: `u_${Date.now()}`, role: 'user', text };
     setMessages(prev => [...prev, userMsg]);
     setBusy(true);
-
-    const keys = loadKeys();
-    if (!keys.anthropic) {
-      setBusy(false);
-      setMessages(prev => [...prev, { id: `e_${Date.now()}`, role: 'assistant', text: '⚠ No Anthropic API key set. Open Settings to add one.' }]);
-      setOpenSettings(true);
-      return;
-    }
 
     const ac = new AbortController();
     setAbortController(ac);
