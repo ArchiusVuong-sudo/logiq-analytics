@@ -10,16 +10,17 @@ export async function GET() {
   if (error) return Response.json({ error: error.message }, { status: 500 });
   if (!threads || threads.length === 0) return Response.json({ threads: [] });
 
-  // Filter out empty threads (no user/assistant messages AND no canvas blocks).
-  // These are orphans — usually from a failed first-send (e.g. missing API key)
-  // or a "New conversation" click that was never used. They clutter the sidebar.
+  // A thread is visible only if it produced something the user can read back:
+  // an assistant reply OR at least one canvas block. User-only threads (typed
+  // a message but the agent never finished — cancel, error, tab close) are
+  // filtered out so the sidebar lists real conversations only.
   const ids = threads.map(t => t.id);
-  const [{ data: msgRows }, { data: blkRows }] = await Promise.all([
-    db.from('messages').select('thread_id').in('thread_id', ids),
+  const [{ data: asstRows }, { data: blkRows }] = await Promise.all([
+    db.from('messages').select('thread_id').eq('role', 'assistant').in('thread_id', ids),
     db.from('canvas_blocks').select('thread_id').in('thread_id', ids),
   ]);
   const hasContent = new Set<string>();
-  for (const r of msgRows || []) if (r.thread_id) hasContent.add(r.thread_id);
+  for (const r of asstRows || []) if (r.thread_id) hasContent.add(r.thread_id);
   for (const r of blkRows || []) if (r.thread_id) hasContent.add(r.thread_id);
 
   const visible = threads.filter(t => hasContent.has(t.id)).slice(0, 50);
